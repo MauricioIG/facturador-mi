@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Mi App facturacion{% endblock %}</title>
+</head>
+<body>
+    {% if user.is_authenticated %}
+        <p>Hola, {{ user.username }} |
+           <a href="{% url 'logout' %}">Cerrar sesión</a></p>
+    {% else %}
+        <p><a href="{% url 'login' %}">Iniciar sesión</a> |
+           <a href="{% url 'registro' %}">Registrarse</a></p>
+    {% endif %}
+
+    <hr>
+    {% block content %}{% endblock %}
+</body>
+</html>

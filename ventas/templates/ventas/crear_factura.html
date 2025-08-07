@@ -1,0 +1,20 @@
+<h1>Crear Factura</h1>
+<form method="POST">
+  {% csrf_token %}
+  <label>Cliente:</label>
+  <select name="cliente_id">
+    {% for cliente in clientes %}
+      <option value="{{ cliente.id }}">{{ cliente.razon_social }}</option>
+    {% endfor %}
+  </select><br><br>
+
+  <h3>Productos:</h3>
+  {% for producto in productos %}
+    <label>{{ producto.nombre }} - ${{ producto.precio_unitario }}</label>
+    <input type="number" name="producto_{{ producto.id }}" value="0" min="0"><br>
+  {% endfor %}
+
+  <br><button type="submit">Crear Factura</button>
+</form>
+
+
