@@ -48,27 +48,45 @@ def crear_factura(request):
         )
 
         total = Decimal('0.00')
+
         for key in request.POST:
             if key.startswith('producto_'):
                 producto_id = key.split('_')[1]
-                cantidad = int(request.POST.get(key))
+                cantidad = Decimal(request.POST.get(key))  # usar Decimal
                 producto = get_object_or_404(Producto, pk=producto_id)
-                precio_total = producto.precio_unitario * cantidad
-                total += precio_total
+
+                precio_unitario = producto.precio_unitario
+                subsidio = Decimal('0.00')  # o un valor calculado si aplica
+                precio_sin_subsidio = precio_unitario + subsidio
+                # puedes calcularlo si lo estás usando
+                descuento = Decimal('0.00')
+
+                precio_total = (precio_unitario * cantidad) - descuento
 
                 DetalleFactura.objects.create(
                     factura=factura,
                     producto=producto,
                     cantidad=cantidad,
-                    precio_total=precio_total
+                    precio_unitario=precio_unitario,
+                    subsidio=subsidio,
+                    precio_sin_subsidio=precio_sin_subsidio,
+                    descuento=descuento,
+                    precio_total=precio_total,
+                    descripcion=producto.descripcion if hasattr(
+                        producto, 'descripcion') else '',
+                    detalle_adicional=''  # O llena desde POST si lo usas en el formulario
                 )
+
+                total += precio_total
 
         factura.total = total
         factura.save()
+
         return redirect('detalle_factura', factura_id=factura.id)
 
     clientes = Cliente.objects.all()
     productos = Producto.objects.all()
+
     return render(request, 'ventas/crear_factura.html', {
         'clientes': clientes,
         'productos': productos
