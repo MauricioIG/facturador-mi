@@ -1,7 +1,46 @@
 from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.forms import AuthenticationForm
 from .models import Cliente, Producto, Factura, DetalleFactura
 
 
+# 🔹 Formulario de Registro de Usuario sin confirmación de contraseña
+class RegistroForm(forms.ModelForm):
+    username = forms.CharField(
+        label="Usuario",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    password = forms.CharField(
+        label="Contraseña",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'password']
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.password = make_password(self.cleaned_data['password'])
+        if commit:
+            user.save()
+        return user
+
+
+# 🔹 Formulario de Login Personalizado
+class CustomAuthenticationForm(AuthenticationForm):
+    username = forms.CharField(
+        label="Usuario",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    password = forms.CharField(
+        label="Clave de acceso",
+        widget=forms.PasswordInput(attrs={'class': 'form-control'})
+    )
+
+
+# 🔹 Formulario para Cliente
 class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
@@ -20,6 +59,7 @@ class ClienteForm(forms.ModelForm):
         return ruc
 
 
+# 🔹 Formulario para Producto
 class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
@@ -32,11 +72,14 @@ class ProductoForm(forms.ModelForm):
         }
 
 
+# 🔹 Formulario para Factura
 class FacturaForm(forms.ModelForm):
     class Meta:
         model = Factura
-        fields = ['cliente', 'numero_autorizacion',
-                  'clave_acceso', 'ambiente', 'emision', 'total']
+        fields = [
+            'cliente', 'numero_autorizacion', 'clave_acceso',
+            'ambiente', 'emision', 'total'
+        ]
         widgets = {
             'cliente': forms.Select(attrs={'class': 'form-control'}),
             'numero_autorizacion': forms.TextInput(attrs={'class': 'form-control'}),
@@ -47,6 +90,7 @@ class FacturaForm(forms.ModelForm):
         }
 
 
+# 🔹 Formulario para Detalle de Factura
 class DetalleFacturaForm(forms.ModelForm):
     class Meta:
         model = DetalleFactura

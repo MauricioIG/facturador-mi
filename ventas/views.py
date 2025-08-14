@@ -3,11 +3,13 @@ from .models import Cliente, Producto, Factura, DetalleFactura
 from django.http import HttpResponse
 from django.utils import timezone
 from decimal import Decimal
+from ventas.sri.clave_acceso import generar_clave_acceso
+
 
 # Autenticación
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from .forms import RegistroForm  # ✅ Usa el formulario personalizado
 
 # ========================
 #     AUTENTICACIÓN
@@ -16,13 +18,13 @@ from django.contrib.auth.decorators import login_required
 
 def registro(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = RegistroForm(request.POST)  # ✅ Usa tu formulario personalizado
         if form.is_valid():
             usuario = form.save()
             login(request, usuario)
             return redirect('lista_productos')
     else:
-        form = UserCreationForm()
+        form = RegistroForm()
     return render(request, 'ventas/registro.html', {'form': form})
 
 
@@ -58,7 +60,6 @@ def crear_factura(request):
                 precio_unitario = producto.precio_unitario
                 subsidio = Decimal('0.00')  # o un valor calculado si aplica
                 precio_sin_subsidio = precio_unitario + subsidio
-                # puedes calcularlo si lo estás usando
                 descuento = Decimal('0.00')
 
                 precio_total = (precio_unitario * cantidad) - descuento
@@ -74,7 +75,7 @@ def crear_factura(request):
                     precio_total=precio_total,
                     descripcion=producto.descripcion if hasattr(
                         producto, 'descripcion') else '',
-                    detalle_adicional=''  # O llena desde POST si lo usas en el formulario
+                    detalle_adicional=''  # O llena desde POST si lo usas
                 )
 
                 total += precio_total

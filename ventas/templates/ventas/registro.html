@@ -1,14 +1,23 @@
 {% extends 'base.html' %}
 
-{% block title %}Registro{% endblock %}
-
 {% block content %}
-<h2>Registro</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }} 
-    <button type="submit">Registrarse</button>
-</form>
-<p>¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a></p>
+<div class="container mt-5">
+    <h2>Crear cuenta</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="text-danger">{{ field.errors|striptags }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Registrarse</button>
+    </form>
+</div>
 {% endblock %}
+
 
